@@ -17,7 +17,7 @@ from fenics import *
 import numpy as np
 
 from types import ModuleType
-import timefilters as tf
+import lib.timefilters as tf
 import time as pytimer
 import argparse
 from subprocess import check_output
