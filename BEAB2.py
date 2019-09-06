@@ -97,7 +97,7 @@ if(args.nopics):
 
 paraview_frequency = args.parfreq
 
-exec('from '+str(args.problem) +' import *')
+exec('from problems.'+str(args.problem) +' import *')
 #from problem import *
 
 print("Using filter number "+ str(args.filters))
