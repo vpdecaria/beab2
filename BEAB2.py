@@ -6,10 +6,9 @@ or a conditionally stable implicit-explicit method.
 The code is also adaptive by default, but adaptivity can be turned off with the
 --constant flag.
 
-This program is meant to be modular. It can handle many test problems, and
-the user can supply their own problem via the -p or --problem tag. Omit the '.py'
+The user can supply their own problem via the -p or --problem tag. Omit the '.py'
 at the end of the file. These problem files are like an input deck and must
-contain certain information, but they are themselves python files.
+contain certain information, but they are python files.
 """
 
 from __future__ import print_function
@@ -40,7 +39,6 @@ parser = argparse.ArgumentParser(description='An adaptive, linearly implicit/imp
 parser.add_argument('-f','--filters', help ="Run the test using up to the filter number specified by \
 	this argument. An input of 0 is unmodified Backward Euler. The default selection is\
 	4, which allows for the calculation of the estimator of the fourth order method.", type = int,default = 1)
-parser.add_argument('--pressure', help ="Enabling this option will also apply time filters to the pressure of the same order specified in -f.",action="store_true")
 parser.add_argument('-o','--output', help ="The file name for the text file containing the errors with respect to delta t. Default file name is date-time.txt",type =str, default = "errors/temp/" + str(check_output(['date','+%Y-%m-%d_%R:%S'])).strip()+".txt")
 parser.add_argument('-t','--tolerance', help ="The tolerance used to adapt the step size. Right now, it is just based on error committed per time step, but can be made more sophisticated later.",type =np.float64, default = 1e-3)
 parser.add_argument('-r','--ratio', help ="The maximum step size ratio allowed, where step size ratio is (step size at time n divided by step size at time n minus 1) The default value is 2.",type =np.float64, default = 2)
@@ -51,7 +49,6 @@ parser.add_argument('-p','--problem', help ="The name of a user created python m
 all the information necessary to run a specific test problem, including mesh, boundary conditions,\
 					body forces, exact solutions, etc. There is a certain syntax that I need\
 					to specify eventually. ",type =str, default = 'taylor_green_problem')
-parser.add_argument('--bdforder', help ="The order of the bdf_method", type = int,default = 3)
 
 parser.add_argument('--paraview', help ="Output name for pvd and vtu files",type =str, default = "pvd/tmp")
 parser.add_argument('--parfreq', help ="Frequency with respect to delta t to take paraview snapshots.", type = int,default = 1000000)
@@ -102,10 +99,6 @@ exec('from problems.'+str(args.problem) +' import *')
 
 print("Using filter number "+ str(args.filters))
 filtersToUse = args.filters
-if(args.pressure):
-	print("Also filtering pressue.")
-	
-filterPressure = args.pressure
 
 constantStepSize = args.constant
 if(constantStepSize):
@@ -130,7 +123,7 @@ minStepSize = 1e-12
 
 errorfName = args.output
 errorfile = open(errorfName, 'w')
-output = "T final =" + str(T) +", Filters Used "+ str(filtersToUse) + str(filterPressure) +'\n'
+output = "T final =" + str(T) +", Filters Used "+ str(filtersToUse)  +'\n'
 errorfile.write(output)
 
 #Start dt loop
@@ -145,11 +138,21 @@ K = np.ones(4)*dt
 
 #vector of times. Earlier times at start of array
 
-bdf_order = args.bdforder
-bdf_num_times = bdf_order+1
-
-total_num_steps=bdf_order + 1
-total_num_times = total_num_steps+1
+#Determine how many steps the method is (one step or multistep)
+if (orders_to_use == 12 or orders_to_use == 2):
+	if not constantStepSize:
+		total_num_steps = 3
+	elif constantStepSize:
+		total_num_steps = 2
+if (orders_to_use == 1):
+	if constantStepSize:
+		if imex_extrapolation == 'fe':
+			total_num_steps = 1
+		elif imex_extrapolation == 'ab2':
+			total_num_steps = 2
+	if not constantStepSize:
+		if imex_extrapolation == 'ab2':
+			total_num_steps = 2
 
 Ts = np.array([-j*dt for j in range(total_num_steps,-1,-1)])
 
@@ -215,8 +218,6 @@ uy_4,py_4  = split(y_4)
 
 time_filter = Function(W)
 interp_error = Function(W)
-
-#A_PDE_rhs = assemble()
 
 tOld = 0
 #TIME STEPPING
@@ -344,23 +345,23 @@ while (tOld < T-1e-15):
 			as_backend_type(A).set_nullspace(null_space)
 
 		num_krylov_iterations = solver.solve(w_.vector(),b_rhs)
-	
-		#if(solver_passed):
-		#	print("Solver Failed?")
-		#	exit()
+
 		print("Krylov solver converged in ", num_krylov_iterations)
 	
-	#REGULAR SOLVE
+	#DEFAULT SOLVE (Whatever 'solve' happens to be in this version of fenics)
+	#In single thread mode, seems to be umfpack.
 	elif(solver_type=="solve"):
 		solve(A,w_.vector(),b_rhs)
+	#LU SOLVER - Don't use this if using semi-implicit or if dt often.
+	elif(solver_type== "lu"):
+		if(dt != dt_n or step_counter==0):
+			#Configure LU SOLVER
+			print("Performing LU factorization.")
+			lu_solver = LUSolver(A)
+			print("Finished setting up LU solver.")
+		lu_solver.solve(w_.vector() ,b_rhs)
 	else:
 		error("No valid linear solver listed.")
-	
-	#LU_SOLVE
-	#if(dt != dt_n or step_counter==0):
-		#Configure LU SOLVER
-	#	lu_solver = LUSolver(A)
-	#lu_solver.solve(w_.vector() ,b_rhs)
 
 	#Make pressure mean zero
 	p_temp =  w_.split(True)[1]
@@ -486,18 +487,16 @@ while (tOld < T-1e-15):
 
 		step_counter+=1
 	else:
-		print("Failed FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF: Halving Time Step")
+		print("Failed: Halving Time Step")
 		#Update Estimates
-		#saftey_factor_failed = 0.5
 		saftey_factor_failed = 0.7
 		[knp1,junk] = tf.pickSolutionMaxK(EstVector,tolerance,dt,saftey_factor_failed,[2,3,4])
 		#dt = np.max([dt/2.,knp1])
 		dt = knp1
 		k = dt
 		numOfFailures += 1
-		#Force all simulations to end at the same time
+		#Force all simulations to end at the final time T
 		knp1 = np.min([knp1,T-t])
-		#exit()
 	
 elapsed_time = pytimer.time()-loop_timer
 print("Main loop took ",elapsed_time ," seconds.")
@@ -506,9 +505,14 @@ print("Spent ",total_error_time ," seconds calculating errors.")
 #Calculate final errors
 
 errorfile.write("\nEND\ntolerance, l2L2 error, l2H1 error, l2L2 Pressure error, Number Of Rejections, Starting Step Size, Elapsed Time")
-relative_l2L2_error = np.sqrt(l2L2_error)/np.sqrt(l2L2)
-relative_l2L2_error_pressure = np.sqrt(l2L2_error_pressure)/np.sqrt(l2L2_pressure)
-relative_l2H1_error = np.sqrt(l2H1_error)/np.sqrt(l2H1)
+if calculate_errors:
+	relative_l2L2_error = np.sqrt(l2L2_error)/np.sqrt(l2L2)
+	relative_l2L2_error_pressure = np.sqrt(l2L2_error_pressure)/np.sqrt(l2L2_pressure)
+	relative_l2H1_error = np.sqrt(l2H1_error)/np.sqrt(l2H1)
+else:
+	relative_l2L2_error = 'Not applicable'
+	relative_l2L2_error_pressure = 'Not applicable'
+	relative_l2H1_error = 'Not applicable'
 print("l2L2 error:",relative_l2L2_error)
 print("l2L2P error:",relative_l2L2_error_pressure)
 

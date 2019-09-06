@@ -35,7 +35,7 @@ def boundary(x, on_boundary):
 #Basic Problem info
 nu = 1.0/1.0             # kinematic viscosity
 Re = 1.0 / nu
-T = .01          # final time
+T = 4          # final time
 penalty = 1e-6
 
 # Create mesh and define function spaces
