@@ -1,0 +1,5 @@
+#This is a directory to store paraview files. 
+#Since these can take up a lot of room, Git will ignore everything in here
+*
+#except for this .gitignore file
+!.gitignore
