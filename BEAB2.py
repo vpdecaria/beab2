@@ -65,6 +65,8 @@ parser.add_argument('--semi', help ="Use the more stable, but costlier, linearly
 parser.add_argument('--extrap', help ="Which IMEX scheme to use. Choices are ab2 and fe.",default = "ab2")
 parser.add_argument('--coldstart', help ="In the absense of a nice solution to initialize with, this will take the first three steps with BEFE.",action="store_true")
 parser.add_argument('-s','--solver', help ="specify which solver to use. Defauts to the solve command",type=str,default="solve")
+parser.add_argument('--stepseq', help ="This feature is intended to force some possibly pathological stepsize sequence. \
+					Possible options include...",type =str, default = "false")
 
 
 
