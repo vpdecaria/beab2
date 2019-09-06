@@ -262,11 +262,13 @@ if writePVD:
 
 #Configure iterative solver
 
-#solver = KrylovSolver('bicgstab', "amg")
+solver = KrylovSolver('bicgstab', "amg")
 #solver = KrylovSolver('cg', "amg")
 
 #solver = KrylovSolver('gmres', "amg")
-solver = PETScKrylovSolver("gmres","amg")
+
+#I'm not sure what PETScKrylovSolver was. Maybe related to null space stuff?
+#solver = PETScKrylovSolver("gmres","amg")
 
 #solver.parameters["relative_tolerance"] = 1e-8
 solver.parameters["error_on_nonconvergence"] = False
@@ -342,7 +344,9 @@ while (tOld < T-1e-15):
 	if(solver_type=="krylov"):
 		if(dt != dt_n or step_counter==0):
 			solver.set_operator(A)
-			as_backend_type(A).set_nullspace(null_space)
+			#the null space thing makes it not work?
+			#as_backend_type(A).set_nullspace(null_space)
+			print('HI')
 
 		num_krylov_iterations = solver.solve(w_.vector(),b_rhs)
 
@@ -497,7 +501,6 @@ while (tOld < T-1e-15):
 		numOfFailures += 1
 		#Force all simulations to end at the final time T
 		knp1 = np.min([knp1,T-t])
-	
 elapsed_time = pytimer.time()-loop_timer
 print("Main loop took ",elapsed_time ," seconds.")
 print("Spent ",total_error_time ," seconds calculating errors.")

@@ -68,22 +68,9 @@ def writeErrorsToFile(fName,dtList,outputfname):
 #xLabel - string, x-axis label
 #lineType - list of strings to indicate type of lines we want drawn.
 #labels - list of strings for titles in legend
-def plotCompareMethods(dt, methodData,xLabel,title,lineType,labels):
-	numberOfMethods = len(methodData)  #How many methods are we comparing?
-	if(lineType == []):
-		for j, data in enumerate(methodData):
-			plt.loglog(dt,data,label = labels[j])
-	else:
-		for j, data in enumerate(methodData):
-			plt.loglog(dt,data,lineType[j],label = labels[j])
-	plt.xlabel(xLabel,fontsize = 18)
-	plt.title(title,fontsize = 18)
-	plt.xlim([25e-4,dt[0]+0.02])
-	plt.legend(loc = 4)
-	
-	plt.show()
 
-dtList = [0.8,0.4,0.2,0.1,0.05, 0.025]
+
+dtList = [0.2,0.1,0.05, 0.025,0.0125,0.00625]
 
 writeErrorsToFile('../../../errors/convergenceTestConstantStep/order-1-extrap-fe-dt-',dtList,'order-1-extrap-fe.txt')
 writeErrorsToFile('../../../errors/convergenceTestConstantStep/order-1-extrap-ab2-dt-',dtList,'order-1-extrap-ab2.txt')

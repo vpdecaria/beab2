@@ -35,8 +35,7 @@ def boundary(x, on_boundary):
 #Basic Problem info
 nu = 1.0/1.0             # kinematic viscosity
 Re = 1.0 / nu
-T = 4          # final time
-penalty = 1e-6
+T = 1          # final time
 
 # Create mesh and define function spaces
 N = 50  #number of nodes
@@ -44,8 +43,6 @@ mesh = RectangleMesh(Point(0,0),Point(2*np.pi,2*np.pi), N, N,"left/right")  #Eve
 
 V = VectorElement("Lagrange", mesh.ufl_cell(), 3)
 Q = FiniteElement("Lagrange", mesh.ufl_cell(), 2)
-#V = VectorElement("CR", mesh.ufl_cell(), 1)
-#Q = FiniteElement("DG", mesh.ufl_cell(), 0)
 TH = V * Q
 
 W = FunctionSpace(mesh, TH,constrained_domain=periodic_bc)

@@ -54,7 +54,7 @@ def plotCompareMethods(dt, methodData,xLabel,yLabel,title,lineType,labels,marker
 	plt.title(title,fontsize = 18)
 	#plt.xlim([50e-4,dt[0]+0.02])
 	#plt.ylim([1e-6,1.7e-1])
-	x_l=0.025
+	x_l=0.00625
 	x_u=0.2
 	#plt.loglog([x_l,x_u],[.5*x_l**2,.5*x_u**2],'k--',label = 'slope 2')
 	plt.loglog([x_l,x_u],[4*x_l**2,4*x_u**2],'k--',label = 'slope 2')
