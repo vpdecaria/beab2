@@ -1,4 +1,4 @@
-#Mean to be run from one directory level up.
+#Meant to be run from one directory level up.
 let mpi_threads=4
 
 for vo in 1 2

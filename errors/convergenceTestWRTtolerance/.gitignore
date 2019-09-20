@@ -1,0 +1,5 @@
+#This is a directory to eror files. For now, we will not sync them. 
+#Git will ignore everything in this directory
+*
+#except for this .gitignore file
+!.gitignore
