@@ -493,15 +493,16 @@ while (tOld < T-1e-15):
 			p_exact_interpolated = interpolate(p_exact,W.sub(1).collapse())
 			p_L2_error = errornorm(p_exact_interpolated, w_.sub(1),degree_rise = 0)
 
-			#Update Temporal Error
-			exact_vel_norm_sq =norm(u_exact,'L2',mesh)**2
-			l2L2 += exact_vel_norm_sq*dt
-			l2L2_error += L2_error**2*dt
-			
-			exact_pres_norm_sq = norm(p_exact,'L2',mesh)**2
-			l2L2_pressure += exact_vel_norm_sq*dt
-			l2L2_error_pressure += p_L2_error**2*dt
-			
+			#_______________Update Temporal Error________________________
+			exact_vel_norm_sq =norm(u_exact,'L2',mesh)**2               #
+			l2L2 += exact_vel_norm_sq*dt                    #VELOCITY   #
+			l2L2_error += L2_error**2*dt                                #
+			#-----------------------------------------------------------#
+			exact_pres_norm_sq = norm(p_exact,'L2',mesh)**2             #
+			l2L2_pressure += exact_pres_norm_sq*dt          #PRESSURE   #
+			l2L2_error_pressure += p_L2_error**2*dt                     #
+			#___________________________________________________________|
+
 			if(mpiRank == 0):
 				print('t = %.2f: L2_error = %.3g' % (t, L2_error))
 				print('t = %.2f: L2_error_pressure = %.3g' % (t, p_L2_error))

@@ -1,7 +1,7 @@
 #Meant to be run from one directory level up.
 let mpi_threads=1
 
-for vo in 1 12 2
+for vo in 12 2 1
 do
 	for tolerance in '1' '1e-1' '1e-2' '1e-3' '1e-4' '1e-5' '1e-6' '1e-7'
 	do

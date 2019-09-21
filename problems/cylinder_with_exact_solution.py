@@ -7,24 +7,28 @@ import matplotlib.pyplot as plt
 #Basic Problem info
 nu = 1.0             # kinematic viscosity
 Re = 1.0 / nu
-T = 1         # final time
+T = 5         # final time
 #Mesh
 #mesh = Mesh('cyliner.finer.mesh.xml.gz')
 
-N=400
+N=1000
 bigCircle = Circle(Point(0,0),1,N)
 penalty = 1e-6
 
-mesh = generate_mesh(bigCircle,10)
-#mesh = generate_mesh(domain,20)
-plot(mesh)
-plt.show()
+#mesh = generate_mesh(bigCircle,5) #about 7k dof P2p1, 16k p3P2
+#mesh = generate_mesh(bigCircle,10) #about 7k dof P2p1, 16k p3P2
+mesh = generate_mesh(bigCircle,5) #about 7k dof P2p1, 16k p3P2
+#mesh = generate_mesh(bigCircle,20) # about 11k
+#plot(mesh)
+#plt.show()
 
 
 # Define function spaces
 
-V = VectorElement("Lagrange", mesh.ufl_cell(), 2)
-Q = FiniteElement("Lagrange", mesh.ufl_cell(), 1)
+#V = VectorElement("Lagrange", mesh.ufl_cell(), 2)
+#Q = FiniteElement("Lagrange", mesh.ufl_cell(), 1)
+V = VectorElement("Lagrange", mesh.ufl_cell(), 3)
+Q = FiniteElement("Lagrange", mesh.ufl_cell(), 2)
 TH = V * Q
 
 W = FunctionSpace(mesh, TH)
