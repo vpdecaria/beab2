@@ -97,7 +97,7 @@ def writeErrorsToFile(fName,tolList,outputfname):
 
 TolList = ['1', '1e-1', '1e-2', '1e-3' ,'1e-4' ,'1e-5' ,'1e-6', '1e-7']
 
-#TolList = ['1', '1e-1', '1e-2', '1e-3', '1e-4' ,'1e-5' ,'1e-6']
+TolList = ['1', '1e-1', '1e-2', '1e-3' ,'1e-4' ,'1e-5' ,'1e-6']
 
 
 writeErrorsToFile('../../../errors/convergenceTestWRTtolerance/order-1-tol-',TolList,'order-1.txt')
