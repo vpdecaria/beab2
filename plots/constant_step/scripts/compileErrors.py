@@ -2,6 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
 
+#This function handles the case that casting to
+#float is impossible.
+def to_float(input_string):
+	try:
+		new_float=float(input_string)
+		return new_float
+	except:
+		return float('nan')
+
 #A driver to access simulation results
 def getWorkData(filename):
 
@@ -22,7 +31,7 @@ def getWorkData(filename):
 	f.readline()
 	line = f.readline()
 	data = line.strip().split(',')
-	data = [float(i) for i in data]
+	data = [to_float(i) for i in data]
 	l2L2 = data[1]
 	l2H1 = data[2]
 	l2L2Pressure = data[3]
