@@ -36,71 +36,66 @@ def mpi_print(output):
 
 parser = argparse.ArgumentParser(description='An adaptive, linearly implicit/implicit-explicit \
 	euler code.')
+parser.add_argument(\
+'--coldstart', help ="In the absense of a nice solution to initialize with, this will take the\
+	 first three steps with BEFE.",action="store_true")
+parser.add_argument(\
+'--constant', help ="Disable adaptivity.",\
+	action="store_true")
+parser.add_argument(\
+'--error', help ="Evaluate Error norms.",action="store_true")
 
+parser.add_argument(\
+'--extrap', help ="Which explicit scheme to use in IMEX. Choices are ab2 and fe.",default = "ab2")
 parser.add_argument(\
 '-f','--filters', help ="Run the test using up to the filter number specified \
 	by this argument. An input of 0 is unmodified Backward Euler. The default selection is\
 	4, which allows for the calculation of the estimator of the fourth order method.",\
 	 type = int,default = 1)
 parser.add_argument(\
-'-o','--output', help ="The file name for the text file containing the errors\
-	 with respect to delta t. Default file name is date-time.txt",type =str, default = \
-	 "errors/temp/" + str(check_output(['date','+%Y-%m-%d_%R:%S'])).strip()+".txt")
+'--forcefilter', help ="Forces the exclusive use of the filter \
+	passed to argument f.",action="store_true")
 parser.add_argument(\
-'-t','--tolerance', help ="The tolerance used to adapt the step size. \
-	Right now, it is just based on error committed per time step, but can be made more \
-	sophisticated later.",type =np.float64, default = 1e-3)
-parser.add_argument(\
-'-r','--ratio', help ="The maximum step size ratio allowed, where step size \
-	ratio is (step size at time n divided by step size at time n minus 1) The default value is 2.",\
-	type =np.float64, default = 2)
-parser.add_argument(\
-'--constant', help ="Enabling this will disable adaptivity altogether.",\
-	action="store_true")
+'--graddiv', help = "Grad-div parameter. Defaults to zero.", type = np.float64, default = 0)
 parser.add_argument(\
 '-k','--startingStepSize', help ="The initial step size taken.",\
 	type =np.float64, default = 0.000001)
 parser.add_argument(\
-'--forcefilter', help ="Forces the exclusive use of the filter \
-	passed to argument f.",action="store_true")
+'--nopics', help ="Don't write paraview output.",action="store_true")
+parser.add_argument(\
+'-o','--output', help ="The file name for the text file containing the errors\
+	 with respect to delta t. Default file name is date-time.txt",type =str, default = \
+	 "errors/temp/" + str(check_output(['date','+%Y-%m-%d_%R:%S'])).strip()+".txt")
 parser.add_argument(\
 '-p','--problem', help ="The name of a user created python module that contains\
 	all the information necessary to run a specific test problem, including mesh, \
-	boundary conditions, body forces, exact solutions, etc. There is a certain syntax that I need\
-					to specify eventually. ",type =str, default = 'taylor_green_problem')
-
+	boundary conditions, body forces, exact solutions, etc.\
+	Do not include the .py extension.\
+	File should be located in the problems directory.",type =str, default = 'taylor_green_problem')
 parser.add_argument(\
 '--paraview', help ="Output name for pvd and vtu files",type =str, default = "pvd/tmp")
 parser.add_argument(\
 '--parfreq', help ="Frequency with respect to delta t to take paraview snapshots.",\
 	 type = int,default = 1000000)
-
 parser.add_argument(\
-'--error', help ="Evaluate Error norms.",action="store_true")
-
-parser.add_argument(\
-'--vo', help ="Which orders to use, such as 2, 23, 3, 34, 234", type = int,default = 1)
-
-
-parser.add_argument(\
-'--nopics', help ="Don't write paraview output.",action="store_true")
-
+'-r','--ratio', help ="The maximum step size ratio allowed, where step size \
+	ratio is (step size at time n divided by step size at time n minus 1) The default value is 2.",\
+	type =np.float64, default = 2)
 parser.add_argument(\
 '--semi', help ="Use the more stable, but costlier, linearly implicit version.",action="store_true")
-
-parser.add_argument(\
-'--extrap', help ="Which IMEX scheme to use. Choices are ab2 and fe.",default = "ab2")
-parser.add_argument(\
-'--coldstart', help ="In the absense of a nice solution to initialize with, this will take the\
-	 first three steps with BEFE.",action="store_true")
 parser.add_argument(\
 '-s','--solver', help ="specify which solver to use. Defauts to the solve command",\
 	type=str,default="solve")
 parser.add_argument(\
 '--stepseq', help ="This feature is intended to force some possibly pathological stepsize sequence.\
 					 Possible options include...",type =str, default = "false")
-
-#----------------------------------- PARSING THE CONSOLE INPUT -----------------------------------												
+parser.add_argument(\
+'-t','--tolerance', help ="The tolerance used to adapt the step size. \
+	Right now, it is just based on error committed per time step, but can be made more \
+	sophisticated later.",type =np.float64, default = 1e-3)
+parser.add_argument(\
+'--vo', help ="Which orders to use, such as 1, 12, 2", type = int,default = 1)
+#----------------------------------- PARSING THE CONSOLE INPUT -------------------------------------												
 args = parser.parse_args()						
 solver_type=args.solver 	
 stepsequence=args.stepseq
@@ -151,7 +146,14 @@ tolerance = args.tolerance
 maxRatio = args.ratio
 
 forcefilter = args.forcefilter
-#-------------------------------- END PARSING CONSOLE INPUT --------------------------------------
+
+gamma = args.graddiv
+if(gamma == 0):
+	use_grad_div = False
+else:
+	use_grad_div = True
+	gamma_c = Constant(gamma)
+#-------------------------------- END PARSING CONSOLE INPUT ----------------------------------------
 
 #
 #Initialize quantities related to adaptivity
@@ -163,7 +165,7 @@ minStepSize = 1e-12
 
 errorfName = args.output
 errorfile = open(errorfName, 'w')
-output = "T final =" + str(T) +", Filters Used "+ str(orders_to_use)  +'\n'
+output = "T final =" + str(T) +", Filters Used "+ str(orders_to_use) + " Grad-div " + str(gamma)  +'\n'
 errorfile.write(output)
 
 dt = np.float64(args.startingStepSize)
@@ -192,7 +194,7 @@ if (orders_to_use == 1):
 
 Ts = np.array([-j*dt for j in range(total_num_steps,-1,-1)])
 
-#----------------------- DECLARE FINITE ELEMENT FUNCTIONS -----------------------------------------
+#----------------------- DECLARE FINITE ELEMENT FUNCTIONS ------------------------------------------
 
 v,q  = TestFunctions(W)
 
@@ -217,12 +219,12 @@ p_temp = Function(W.sub(1).collapse())
 null_vector=Function(W.sub(1).collapse())
 assign(null_vector,interpolate(Constant(1.0),W.sub(1).collapse()))
 
-#------------------------ CREATE INITIAL CONDITIONS -----------------------------------------------
-assign(w_n.sub(0),interpolate(get_u_exact(0),W.sub(0).collapse()))
-assign(w_n.sub(1),interpolate(get_p_exact(0),W.sub(1).collapse()))
+#------------------------ CREATE INITIAL CONDITIONS ------------------------------------------------
+assign(  w_n.sub(0),interpolate(get_u_exact(0)    ,W.sub(0).collapse()))
+assign(  w_n.sub(1),interpolate(get_p_exact(0)    ,W.sub(1).collapse()))
 
-assign(w_nM1.sub(0),interpolate(get_u_exact(-dt),W.sub(0).collapse()))
-assign(w_nM1.sub(1),interpolate(get_p_exact(-dt),W.sub(1).collapse()))
+assign(w_nM1.sub(0),interpolate(get_u_exact(-dt)  ,W.sub(0).collapse()))
+assign(w_nM1.sub(1),interpolate(get_p_exact(-dt)  ,W.sub(1).collapse()))
 
 assign(w_nM2.sub(0),interpolate(get_u_exact(-2*dt),W.sub(0).collapse()))
 assign(w_nM2.sub(1),interpolate(get_p_exact(-2*dt),W.sub(1).collapse()))
@@ -230,7 +232,7 @@ assign(w_nM2.sub(1),interpolate(get_p_exact(-2*dt),W.sub(1).collapse()))
 u_n,p_n=split(w_n)
 u_nM1=split(w_nM1)[0]
 u_nM2=split(w_nM2)[0]
-#-----------------------  END CREATE INITIAL CONDITONS --------------------------------------------
+#-----------------------  END CREATE INITIAL CONDITONS ---------------------------------------------
 
 #initialize temp solutions
 error_1st_order=Function(W)
@@ -281,17 +283,19 @@ if writePVD:
 
 ###########################    CONFIGURE KRYLOV SOLVER    ##########################################
 
-solver = KrylovSolver('bicgstab', "amg")
-#solver = KrylovSolver('cg', "amg")
+solver = KrylovSolver('bicgstab', "jacobi")
+#solver = KrylovSolver('cg', "amg") #Looks like smoke 
+#solver = KrylovSolver('cg', "jacobi")
 
 #solver = KrylovSolver('gmres', "amg")
+#solver = KrylovSolver('tfqmr',"amg")
 
 #I'm not sure what PETScKrylovSolver was. Maybe related to null space stuff?
 #solver = PETScKrylovSolver("gmres","amg")
 
-#solver.parameters["relative_tolerance"] = 1e-8
+solver.parameters["relative_tolerance"] = 1e-10
 solver.parameters["error_on_nonconvergence"] = False
-solver.parameters["maximum_iterations"] = 100
+solver.parameters["maximum_iterations"] = 10000
 
 null_space = VectorSpaceBasis([null_vector.vector()])
 
@@ -359,6 +363,8 @@ while (tOld < T-1e-15):
 			-p*div(v)*dx                                  \
 			+ div(u)*q*dx                                 \
 			-dot(f,v)*dx 
+	if(use_grad_div):
+		F = F + gamma_c*div(u)*div(v)*dx
 	#######################################################
 
 	## ASSEMBLE MATRIX IF NECESSARY ##
@@ -402,6 +408,7 @@ while (tOld < T-1e-15):
 			lu_solver = LUSolver(A)
 			print("Finished setting up LU solver.")
 		lu_solver.solve(w_.vector() ,b_rhs)
+		print("LU")
 	else:
 		error("User argument is not a valid linear solver.")
 
@@ -413,7 +420,7 @@ while (tOld < T-1e-15):
 	
 	print(EstVector)
 
-	#------------------------------- APPLY TIME FILTERS  ------------------------------------------
+	#------------------------------- APPLY TIME FILTERS  -------------------------------------------
 
 	if (not constantStepSize or orders_to_use==2 or orders_to_use == 12):
 		#Form error estimator
@@ -440,7 +447,7 @@ while (tOld < T-1e-15):
 				EstVector[1]=norm(error_2nd_order.sub(0),'L2',mesh)
 
 
-	#----------------------------  CHOOSE NEXT STEPSIZE  ------------------------------------------
+	#----------------------------  CHOOSE NEXT STEPSIZE  -------------------------------------------
 
 	#If using a predetermined stepsize ratio sequence...
 	if(stepsequence):
@@ -460,7 +467,7 @@ while (tOld < T-1e-15):
 	elif (coldstart and step_counter<=2):
 		J=0
 		knp1=dt
-	#-----------------  EITHER ADVANCE SOLUTION OR REJECT AND RECALCULATE ------------------
+	#-----------------  EITHER ADVANCE SOLUTION OR REJECT AND RECALCULATE --------------------------
 
 	if(stepsequence or constantStepSize or EstVector[J] < tolerance\
 	or np.abs(knp1 - minStepSize) < 1e-10 or (coldstart and step_counter<=2)):
@@ -478,8 +485,8 @@ while (tOld < T-1e-15):
 			assign(w_.sub(0), y_2.sub(0))                             #
 		#--------------------------------------------------------------
 			
-		#-------------- PRINT OUT SOLUTION INFORMATION AT THIS TIME LEVEL ------------------------
-		#------------------ CALCULATE ERRORS IF USER SPECIFIED TO  -------------------------------
+		#-------------- PRINT OUT SOLUTION INFORMATION AT THIS TIME LEVEL --------------------------
+		#------------------ CALCULATE ERRORS IF USER SPECIFIED TO  ---------------------------------
 		if(mpiRank == 0):
 			print("Using order ",J+1)
 			print('At Time t = %.6f' % (t))
@@ -543,6 +550,7 @@ while (tOld < T-1e-15):
 
 			
 		if(step_counter%paraview_frequency ==0 and writePVD):
+			w_.rename("solution","solution")
 			file << (w_.sub(0),t)
 
 		step_counter+=1
@@ -587,9 +595,9 @@ if calculate_errors:
 	relative_l2L2_error_pressure = np.sqrt(l2L2_error_pressure)/np.sqrt(l2L2_pressure)
 	relative_l2H1_error = 'NOT CALCULATED'
 else:
-	relative_l2L2_error = 'Not applicable'
+	relative_l2L2_error          = 'Not applicable'
 	relative_l2L2_error_pressure = 'Not applicable'
-	relative_l2H1_error = 'Not applicable'
+	relative_l2H1_error          = 'Not applicable'
 print("l2L2 error:",relative_l2L2_error)
 print("l2L2P error:",relative_l2L2_error_pressure)
 
@@ -597,8 +605,7 @@ print("l2L2P error:",relative_l2L2_error_pressure)
 output = "\n"  +str(tolerance)            + "," + str(relative_l2L2_error)          + "," \
 			   +str(relative_l2H1_error)  + "," + str(relative_l2L2_error_pressure) + "," \
 			   +str(numOfFailures)        + "," + str(args.startingStepSize)        + "," \
-			   +str(elapsed_time)
+			   +str(elapsed_time)         
 
 errorfile.write(output)
 errorfile.close()
-

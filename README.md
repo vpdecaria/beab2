@@ -14,3 +14,9 @@ This will run the code with default parameters.
 Contains bash scripts that automate tests BEAB2.py. Should be run from top directory, using
 
 bash tests/nameofscript.sh
+
+## problems
+
+Contains modules that define the domain for different test.
+
+
