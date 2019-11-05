@@ -44,12 +44,13 @@ def getWorkData(filename):
 	l2H1 = data[2]
 	l2L2Pressure = data[3]
 	tol = data[0]
+	stokes_solves = counter + data[4]  #Add in the rejected steps.
 	time = data[6]
 	dt_average/=counter
 	
 	
 	f.close()
-	return [counter,l2L2,l2H1,l2L2Pressure,tol,time,dt_average]
+	return [counter,l2L2,l2H1,l2L2Pressure,tol,time,dt_average,stokes_solves]
 
 #Plotting Method
 
@@ -63,8 +64,9 @@ def compileErrors(fName,tolList):
 	rejections = np.array([])
 	times = np.array([])
 	dt_aves = np.array([])
+	stokes_solves_list = np.array([])
 	for tol in tolList:
-		[countertemp,l2L2temp,l2H1temp,l2L2Pressuretemp,currentTol,time,dt_ave] = \
+		[countertemp,l2L2temp,l2H1temp,l2L2Pressuretemp,currentTol,time,dt_ave,stokes_solves] = \
 			getWorkData(fName + str(tol)+'.txt')
 		counter = np.append(counter,countertemp)
 		l2L2 = np.append(l2L2,l2L2temp)
@@ -73,16 +75,18 @@ def compileErrors(fName,tolList):
 		tols = np.append(tols,currentTol)
 		times = np.append(times,time)
 		dt_aves = np.append(dt_aves,dt_ave)
-	return [counter,l2L2,l2H1,l2L2Pressure,tols,times,dt_aves]
+		stokes_solves_list = np.append(stokes_solves_list, stokes_solves)
+	return [counter,l2L2,l2H1,l2L2Pressure,tols,times,dt_aves,stokes_solves_list]
 
 def writeErrorsToFile(fName,tolList,outputfname):
-	[counter,l2L2,l2H1,l2L2Pressure,tols, times,dt_aves] = compileErrors(fName,tolList)
+	[counter,l2L2,l2H1,l2L2Pressure,tols, times,dt_aves,stokes_solves] = compileErrors(fName,tolList)
 	f = open(outputfname,'w')
 	f.write('Junk\n')
-	f.write('tolerance, l2L2 error, l2H1 error, l2L2 Pressure error, run time, dt average \n')
+	f.write('tolerance, l2L2 error, l2H1 error, l2L2 Pressure error, run time, dt average, stokes solves \n')
 	for i, tol in enumerate(tols):
 		output = "\n" + str(tol) + "," + str(l2L2[i]) + "," +str(l2H1[i])  + "," \
-			+ str(l2L2Pressure[i]) + ',' + str(times[i]) + ',' + str(dt_aves[i])
+			+ str(l2L2Pressure[i]) + ',' + str(times[i]) + ',' + str(dt_aves[i]) + ","\
+			+str(stokes_solves[i])
 		f.write(output)
 		
 	f.close()
@@ -100,6 +104,6 @@ TolList = ['1', '1e-1', '1e-2', '1e-3' ,'1e-4' ,'1e-5' ,'1e-6', '1e-7']
 TolList = ['1', '1e-1', '1e-2', '1e-3' ,'1e-4' ,'1e-5' ,'1e-6']
 
 
-writeErrorsToFile('../../../errors/convergenceTestWRTtoleranceHarder/order-1-tol-',TolList,'order-1.txt')
+writeErrorsToFile('../../../errors/convergenceTestWRTtoleranceHarder/order-1-tol-' ,TolList,'order-1.txt')
 writeErrorsToFile('../../../errors/convergenceTestWRTtoleranceHarder/order-12-tol-',TolList,'order-12.txt')
-writeErrorsToFile('../../../errors/convergenceTestWRTtoleranceHarder/order-2-tol-',TolList,'order-2.txt')
+writeErrorsToFile('../../../errors/convergenceTestWRTtoleranceHarder/order-2-tol-' ,TolList,'order-2.txt')

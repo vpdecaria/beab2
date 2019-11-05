@@ -71,50 +71,47 @@ def plotCompareMethods(dt, methodData,xLabel,yLabel,title,lineType,labels,marker
 		x_u2=2000
 		multiplier2=8.5e1
 		multiplier1=2.4e0    
-	plt.loglog([x_l1,x_u1],[multiplier1*x_l1**(-1),multiplier1*x_u1**(-1)],'k:',label = 'slope -1',linewidth=2)
-	plt.loglog([x_l2,x_u2],[multiplier2*x_l2**(-2),multiplier2*x_u2**(-2)],'k--',label = 'slope -2')
+	#plt.loglog([x_l1,x_u1],[multiplier1*x_l1**(-1),multiplier1*x_u1**(-1)],'k:',label = 'slope -1',linewidth=2)
+	#plt.loglog([x_l2,x_u2],[multiplier2*x_l2**(-2),multiplier2*x_u2**(-2)],'k--',label = 'slope -2')
 	plt.legend(fontsize = 14)
 	
 	
 	
 	
 	plt.show()
-
-[dt,l2L21fe,wall_time1fe,l2L21fePressure,stokes_solves_1] = getData('order-1.txt')	
 [dt,l2L21ab2,wall_time1ab2,l2L21ab2Pressure,stokes_solves_12] = getData('order-12.txt')	
-#[dt,l2L22fe,wall_time2fe,l2L22fePressure] = getData('order-2.txt')	
-[dt,l2L22ab2,wall_time2ab2,l2L22ab2Pressure,stokes_solves_2] = getData('order-2.txt')	
+[dt,l2L22ab2,wall_time2ab2,l2L22ab2Pressure,stokes_solves_2] = getData('order-2-const.txt')	
 
 #l2L2
 
 xLabel = 'Stokes solves'
 yLabel = r'$\|u-u_h\|_{l2L2}/\|u\|_{l2L2}$'
 #title = r'Velocity Error'
-title='Adaptive velocity error'
+title='Adaptive vs nonadaptive velocity error'
 #lineType = ['k','k--','k-.','k.-']
 lineType = []
 lineType = ['k','b','g','r.-']
 lineType = ['k','b','r','k']
 markers = ['v','o','s','^']
-legend= ['BEAB2',\
+legend= ['2nd order, nonadapt.',\
 		'VSVO 12']
 
 
-plotCompareMethods([stokes_solves_1[2:],stokes_solves_12[2:]],[l2L21fe[2:],l2L21ab2[2:]],xLabel,yLabel,title,lineType,legend,markers,'v')
+plotCompareMethods([stokes_solves_2[1:],stokes_solves_12[1:]],[l2L22ab2[1:],l2L21ab2[1:]],xLabel,yLabel,title,lineType,legend,markers,'v')
 
 #l2L2 pressure
 
 xLabel = 'Stokes solves'
 yLabel = r'$\|p-p_h\|_{l2L2}/\|p\|_{l2L2}$'
 #title = r'Pressure Error'
-title='Adaptive pressure error'
+title='Adaptive vs nonadaptive pressure error'
 lineType = ['k','k--','k-.','k.-']
 lineType = ['k','k--','k-.']
 lineType = ['k','b','r','k','m-.','c:','g']
 markers = ['v','o','s','^','P','*','|']
-legend= ['BEAB2',\
+legend= ['2nd order, nonadapt.',\
 		'VSVO 12']
-plotCompareMethods([stokes_solves_1[2:],stokes_solves_12[2:]],[l2L21fePressure[2:],l2L21ab2Pressure[2:]],xLabel,yLabel,title,lineType,legend,markers,'p')
+plotCompareMethods([stokes_solves_2[1:],stokes_solves_12[1:]],[l2L22ab2Pressure[1:],l2L21ab2Pressure[1:]],xLabel,yLabel,title,lineType,legend,markers,'p')
 
 
 

@@ -65,8 +65,50 @@ def plotCompareMethods(dt, methodData,xLabel,title,lineType,labels):
 	plt.show()
 
 #gamma  = 1e0
-[t,k,filters,normU,normP,normUExact,normPExact,Uerror,Perror] = getData('1e-3second.txt')	
-[t1,k1,filters1,normU1,normP1,normUExact1,normPExact1,Uerror1,Perror1] = getData('1e-4second-constant-step.txt')	
+[t,k,filters,normU,normP,normUExact,normPExact,Uerror,Perror] = getData('../errors/convergenceTestWRTtoleranceHarder/order-12-tol-1e-2.txt')	
+[t1,k1,filters1,normU1,normP1,normUExact1,normPExact1,Uerror1,Perror1] = getData('../errors/convergenceTestWRTtoleranceHarder/order-12-constantstep-tol-1e-2.txt')	
+
+plt.figure(1)
+tFine = np.linspace(0,45,10000)
+#plt.show()
+plt.plot(t,normU,marker = 'x',label=r'VSVO-12, $TOL=10^{-2}$')
+plt.plot(t1,normU1,'--',label='2nd order - nonadaptive')
+#plt.plot(t,normUExact)
+
+
+def cutoff(t):
+	if t <=0:
+		return 0
+	else:
+		return np.exp(-1./((10*t)**10))
+
+	
+def flatQuickStepUp(t):
+	return cutoff(t-9)
+def flatQuickStepDown(t):
+	return 1- cutoff(t-9)
+
+def smoothSteps(t):
+	if t % 20 <= 10 - 1e-10:
+		return flatQuickStepUp(t%10)
+	else:
+		return flatQuickStepDown(t%10)
+
+	
+exact = [np.sqrt(2)*np.pi*smoothSteps(T) for T in tFine]
+plt.plot(tFine,exact,'k',label=r'Exact $||u||$')
+plt.legend(fontsize = 14)
+plt.ylabel(r'$||u||$',fontsize = 18)
+plt.xlabel('t',fontsize = 18)
+plt.xlim([0,45])
+plt.title('Evolution of adaptive vs nonadaptive velocity norms\n with same number of Stokes solves',fontsize=16)
+plt.show()
+
+
+#The below plots also showed the order of the method being used.
+"""
+[t,k,filters,normU,normP,normUExact,normPExact,Uerror,Perror] = getData('../errors/convergenceTestWRTtoleranceHarder/order-12-tol-1e-2.txt')	
+[t1,k1,filters1,normU1,normP1,normUExact1,normPExact1,Uerror1,Perror1] = getData('../errors/convergenceTestWRTtoleranceHarder/order-12-constantstep-tol-1e-2.txt')	
 
 plt.figure(1)
 
@@ -76,17 +118,12 @@ plt.plot(t,filters+1)
 plt.ylabel('Order')
 plt.yticks([1,2])
 plt.xlim([0,45])
-#plt.plot(t1,filters1)
-#
-#plt.plot(t,TotalModelDissipation1e6)
-#plt.plot(t,KineticEnergy1e6+ TotalModelDissipation1e6)
-#plt.plot(t,TotalModelDissipation1e10)
-#plt.plot(t,TotalModelDissipation1e2)
+
 plt.subplot(212)
 tFine = np.linspace(0,45,10000)
 #plt.show()
-plt.plot(t,normU,marker = 'x',label=r'VSVO-12, $TOL=10^{-3}$, 342 steps')
-plt.plot(t1,normU1,'--',label='second order - nonadaptive, 535 steps')
+plt.plot(t,normU,marker = 'x',label=r'VSVO-12, $TOL=10^{-2}$, 221 Stokes solves')
+plt.plot(t1,normU1,'--',label='second order - nonadaptive, 221 Stokes solves')
 #plt.plot(t,normUExact)
 
 
@@ -117,19 +154,4 @@ plt.xlabel('t')
 plt.xlim([0,45])
 plt.show()
 
-"""
-time = 78
-gammas = [1.0,1e2,1e4,1e6,1e8,1e10]
-ModelDissipation1sec = [ModelDissipation1e0[time], ModelDissipation1e2[time],\
-	ModelDissipation1e4[time],ModelDissipation1e6[time],\
-	ModelDissipation1e8[time],ModelDissipation1e10[time]]
-	
-TotalModelDissipation1sec = [TotalModelDissipation1e0[time], TotalModelDissipation1e2[time],\
-	TotalModelDissipation1e4[time],TotalModelDissipation1e6[time],\
-	TotalModelDissipation1e8[time],TotalModelDissipation1e10[time]]
-
-plt.semilogx(gammas,TotalModelDissipation1sec)
-plt.title("Cumulative Dissipation at time " + str(t[time]), fontsize = 18)
-plt.xlabel(r"\gamma")
-plt.show()
 """

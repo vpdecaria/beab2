@@ -1,13 +1,3 @@
-"""
-This is a fully coupled, fully implicity Backward Euler Code to solve NSE in a periodic box with an exact solution.
-
-An exact solution to the Taylor Green Vortex in 2D is given by
-u = (F(t)cos(x)sin(y), -F(t)cos(y)sin(x))
-p = -(1/4)F(t)^2 (cos(2x) + cos(2y))
-
-No boundary conditions because periodic domain.
-"""
-
 from __future__ import print_function
 from fenics import *
 import numpy as np
@@ -91,10 +81,6 @@ def flatQuickStepUpPrime(t):
 def flatQuickStepDownPrime(t):
 	return - cutoffPrime(t-9)
 
-#def flatQuickStepUp(t):
-#	return mollifierStep(t-9)
-#def flatQuickStepDown(t):
-##	return 1- mollifierStep(t-9)
 def smoothSteps(t):
 	if t <= 0:
 		return 0
@@ -109,27 +95,11 @@ def smoothStepsPrime(t):
 		return flatQuickStepUpPrime(t%10)
 	else:
 		return flatQuickStepDownPrime(t%10)
-	
-
-
-#t = np.linspace(-1e-1,40,1000000)
-
-
-def discSteps(t):
-	if t <= 0:
-		return 0
-	elif t % 20 <= 10:
-		return 0
-	else:
-		return 1
 
 def FF(t):
 	return smoothSteps(t)
-#def FF_prime(t):
-#	return (FF(t+1e-5) -FF(t-1e-5))/2e-5
 def FF_prime(t):
 	return smoothStepsPrime(t)
-#y = [2*nu*FF(T) + FF_prime(T) for T in t]
 
 
 #t = np.linspace(-1e-1,40,1000000)
@@ -153,12 +123,3 @@ def get_p_exact(t):
 
 def get_bcs(t):
 	return []
-"""
-def get_f(t):
-	if(0<= t%1 <= 1-2./scale):
-		return Expression(('0','0'),degree = 2)
-	elif(1-2./scale < t%1 <= translation):
-		return whatever
-	else:
-		return Expression(('(exp)*cos(x[0])*sin(x[1])','-exp(-2 *Nu *t)*sin(x[0])*cos(x[1])'),t=0.0,Nu=nu,degree = 2)
-"""
