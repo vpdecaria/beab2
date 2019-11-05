@@ -9,23 +9,50 @@ nu = 1.0             # kinematic viscosity
 T = 20               # final time
 
 #_________________________________DEFINE THE OSCILLATIONS IN TIME___________________________________
-def smooth_bridge(t):
-	return np.exp(-np.exp(-1./(1-t)**2)/t**2)
 
-period         = 10.0
-peak           = 1.0
-impulse_length = 5.0
+
+period            = 10.0
+peak              = 1.0
+impulse_length    = 5.0
+transition_length = .5   #.1 harder, .5 slightly harder
+
+def smooth_bridge(t):
+	return np.exp(-np.exp(-1./(1-t/transition_length)**2)/(t/transition_length)**2)
+
+def smooth_bridge_prime(t,x):
+	return (x**2 *(2 *t**3 - 6 *t**2 *x + 4* t* x**2 - 2* x**3)* np.exp(x**2 *(-(np.exp(-x**2/(t - x)**2)/t**2 + 1./(t - x)**2))))/(t**3* (t - x)**3)
+
+def smooth_bridge_prime_finite_diff(t):
+	h = 1e-6
+	return (smooth_bridge(t+h)-smooth_bridge(t-h))/(2*h)
+
 def amplitude(t):
-	if t%period<=impulse_length-1.0:
+	if   t%period<=impulse_length-transition_length:
 		return 1.0
 	elif t%period<=impulse_length:
 		theta = impulse_length-t%period
 		return smooth_bridge(theta)
-	elif t%period<=period-1.0:
+	elif t%period<=period-transition_length:
 		return 0.0
 	else:
 		theta = period-t%period
-		return smooth_bridge(1-theta)
+		return smooth_bridge(transition_length-theta)
+
+def amplitude_prime(t):
+	if   t%period<=impulse_length-transition_length:
+		return 0
+	elif t%period<=impulse_length:
+		theta = impulse_length-t%period
+		return smooth_bridge_prime(theta,transition_length)
+	elif t%period<=period-transition_length:
+		return 0.0
+	else:
+		theta = period-t%period
+		return smooth_bridge_prime(transition_length-theta,transition_length)
+
+def amplitude_prime_finite_diff(t):
+	h = 1e-8
+	return (amplitude(t+h) - amplitude(t-h))/(2*h)
 #Larger period should be multiple of period
 largerPeriod=2*period
 def posAndNegOscillations(t):
@@ -34,14 +61,28 @@ def posAndNegOscillations(t):
 	else:
 		return amplitude(t)-1
 def Amplitude(t):
-	return posAndNegOscillations(t+period-1)
-def leftCircleAmplitude(t):
-	return posAndNegOscillations(t+1./4.*period-1)
-def rightCircleAmplitude(t):
-	return posAndNegOscillations(t+3./4.*period-1)
+	return posAndNegOscillations(t+period-1)# + .1*np.sin(t)
 
+def modulatingFunction(t):
+    return amplitude(t) + .1*np.sin(t)
 
+def modulatingFunctionPrime(t):
+	return amplitude_prime(t) + .1*np.cos(t)
+
+def modulatingFunctionPrimeDiff(t):
+	return amplitude_prime_finite_diff(t) + .1*np.cos(t)
+
+x = np.linspace(0,20,100000)
+y     = [modulatingFunction(t+1.) for t in x]
+y_der = [modulatingFunctionPrimeDiff(t+1.) for t in x]
+#y_der_diff = [amplitude_prime_finite_diff(t) for t in x]
+#plt.plot(x,y)
+#plt.plot(x,y_der)
+#plt.plot(x,y_der_diff)
+#plt.show()
+#exit()
 #_____________________________ DEFINE OSCILLATIONS IN TIME # 2 _____________________________________
+"""
 TOLERANCE = 1e-14
 
 def w_osc(t):
@@ -85,10 +126,14 @@ y = [amp(t) for t in x]
 #plt.plot(x,y)
 #plt.show()
 #exit()
-
+"""
 #_______________________________________ DEFINE MESH _______________________________________________
+def amp(t):
+    return modulatingFunction(t+1)
+def amp_prime(t):
+	return modulatingFunctionPrimeDiff(t+1)
 
-N=1000
+N=500
 bigCircle = Circle(Point(0,0),1,N)
 
 #mesh = generate_mesh(bigCircle,5) #about 7k dof P2p1, 16k p3P2
