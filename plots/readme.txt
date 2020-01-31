@@ -4,8 +4,16 @@ This directory contains scripts (not data) to make the plots found in
 
 This readme explains how to make specific plots founds in the paper.
 From the directory that contains this readme.txt, copy and 
-paste the commands below a title into the terminal to make these plots,
-assuming that you ran the tests to create the data.
+paste the commands below a title into the terminal to make these plots.
+
+
+This assumes that you ran the tests yourself.
+If you do not run the tests yourself to create the data, our copy is in 
+errors/data_for_paper. From the directory with this readme file, run the following 
+two commands in a terminal. Then you should be able to generate the plots.
+
+cp ../errors/data_for_paper/convergenceTestWRTtoleranceHarder/*.txt ../errors/convergenceTestWRTtoleranceHarder/
+cp ../errors/data_for_paper/convergenceTestConstantStep/*.txt ../errors/convergenceTestConstantStep/
 
 "Nonadaptive velocity/pressure error"
 cd constant_step/
