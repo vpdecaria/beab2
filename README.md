@@ -1,5 +1,5 @@
 # MOOSE-IMEX-12
-This is an implementation of an adaptive stepsize and or Implicit/Explicit (IMEX) timestepping scheme for the incompressible Navier-Stokes equations. The method is called MOOSE-IMEX-12. MOOSE stands for Multiple Order One Solve Embedded, because there is only one linear solve each time step, but two solutions of different orders of accuracy are produced. The '12' is because approximations of order one and two are created each timestep.
+This is an implementation of an adaptive stepsize and or Implicit/Explicit (IMEX) timestepping scheme for the incompressible Navier-Stokes equations. The method is called MOOSE-IMEX-12. MOOSE stands for Multiple Order One Solve Embedded, because there is only one linear solve each time step, but two solutions of different orders of accuracy are produced. The '12' is because approximations are of orders one and two.
 
 We use FEniCS for the finite element discretization.
 
