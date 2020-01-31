@@ -6,7 +6,7 @@ or a conditionally stable implicit-explicit method.
 The code is also adaptive by default, but adaptivity can be turned off with the
 --constant flag.
 
-The user can supply their own problem via the -p or --problem tag. Omit the '.py'
+The user can supply their own problem via the -p or --problem tag, omitting the '.py'
 at the end of the file. These problem files are like an input deck and must
 contain certain information, but they are python files.
 """
@@ -49,7 +49,7 @@ parser.add_argument(\
 '--extrap', help ="Which explicit scheme to use in IMEX. Choices are ab2 and fe.",default = "ab2")
 parser.add_argument(\
 '-f','--filters', help ="Run the test using up to the filter number specified \
-	by this argument. An input of 0 is unmodified Backward Euler. The default selection is\
+	by this argument. An input of 1 is unmodified Backward Euler. The default selection is\
 	4, which allows for the calculation of the estimator of the fourth order method.",\
 	 type = int,default = 1)
 parser.add_argument(\
@@ -84,17 +84,21 @@ parser.add_argument(\
 parser.add_argument(\
 '--semi', help ="Use the more stable, but costlier, linearly implicit version.",action="store_true")
 parser.add_argument(\
-'-s','--solver', help ="specify which solver to use. Defauts to the solve command",\
+'-s','--solver', help ="specify which solver to use. Defaults to the solve command. Options are\
+    solve , lu , and krylov. NOTE: krylov DOES NOT PRODUCE GOOD RESULTS. I AM NOT SURE WHY.",\
 	type=str,default="solve")
 parser.add_argument(\
 '--stepseq', help ="This feature is intended to force some possibly pathological stepsize sequence.\
-					 Possible options include...",type =str, default = "false")
+					 Separate a cyclic sequence of stepsize ratios by hyphens. For example,\
+					 enter 0.5-2-1.5 to halve the timestep, then double it, then multiply it by\
+					 1.5, and repeat.",type =str, default = "false")
 parser.add_argument(\
 '-t','--tolerance', help ="The tolerance used to adapt the step size. \
 	Right now, it is just based on error committed per time step, but can be made more \
 	sophisticated later.",type =np.float64, default = 1e-3)
 parser.add_argument(\
-'--vo', help ="Which orders to use, such as 1, 12, 2", type = int,default = 1)
+'--vo', help ="Which orders to use, such as 1, 12, 2. To run MOOSE-IMEX-12, choose 12, and do\
+        not specify -f or use --forcefilter, or --constant.", type = int,default = 1)
 #----------------------------------- PARSING THE CONSOLE INPUT -------------------------------------												
 args = parser.parse_args()						
 solver_type=args.solver 	
@@ -349,7 +353,7 @@ while (tOld < T-1e-15):
 	
 
 	##############   DEFINE FUNCTIONAL   #########3########       
-	if(not use_semi_implicit):
+	if(not use_semi_implicit):#------ USES an IMEX method
 		F = dot((u-u_n)/k,v)*dx                           \
 			+b(w_extrap.sub(0),w_extrap.sub(0),v)         \
 			+nu*inner(nabla_grad(u), nabla_grad(v))*dx    \
@@ -594,7 +598,8 @@ if calculate_errors:
 	relative_l2L2_error = np.sqrt(l2L2_error)/np.sqrt(l2L2)
 	relative_l2L2_error_pressure = np.sqrt(l2L2_error_pressure)/np.sqrt(l2L2_pressure)
 	relative_l2H1_error = 'NOT CALCULATED'
-else:
+else: #Error was not measured. To calculate error, specify an exact solution in the problem file
+      #and run with the --error flag.
 	relative_l2L2_error          = 'Not applicable'
 	relative_l2L2_error_pressure = 'Not applicable'
 	relative_l2H1_error          = 'Not applicable'
