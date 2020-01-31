@@ -11,6 +11,17 @@ python3 BEAB2.py
 
 This will run the code with default parameters.
 
+To use MOOSE-IMEX-12, run with the vo (for variable order flag)
+
+python3 BEAB2.py --vo 12
+
+Specify the starting stepsize with -k (default is 1e-6) and the tolerance with -t (default is 1e-3).
+Give it your own problem input deck with -p, or --problem. The default is taylor_green_problem. For example,
+
+python3 BEAB2.py --vo 12 -k 0.1 -t 1e-5 --problem taylor_green_problem
+
+This runs MOOSE-IMEX-12 with a starting stepsize of 0.1, a tolerance of 1e-5, and specifies the Taylor Green vortex problem. taylor_green_problem is a python file, but DO NOT put .py at the end.
+
 # Directories
 
 ## tests
