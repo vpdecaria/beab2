@@ -75,7 +75,7 @@ def plotCompareMethods(dt, methodData,xLabel,yLabel,title,lineType,labels,marker
 	plt.loglog([x_l2,x_u2],[multiplier2*x_l2**(-2),multiplier2*x_u2**(-2)],'k--',label = 'slope -2')
 	plt.legend(fontsize = 14)
 	
-	
+	plt.tight_layout()
 	
 	
 	plt.show()
@@ -88,7 +88,7 @@ def plotCompareMethods(dt, methodData,xLabel,yLabel,title,lineType,labels,marker
 #l2L2
 
 xLabel = 'Stokes solves'
-yLabel = r'$\|u-u_h\|_{l2L2}/\|u\|_{l2L2}$'
+yLabel = r'Relative $\ell^2(0,T;L^2(\Omega))$ error'
 #title = r'Velocity Error'
 title='Adaptive velocity error'
 #lineType = ['k','k--','k-.','k.-']
@@ -96,8 +96,8 @@ lineType = []
 lineType = ['k','b','g','r.-']
 lineType = ['k','b','r','k']
 markers = ['v','o','s','^']
-legend= ['BEAB2',\
-		'VSVO 12']
+legend= ['VSS BE-AB2',\
+		'MOOSE-IMEX-12']
 
 
 plotCompareMethods([stokes_solves_1[2:],stokes_solves_12[2:]],[l2L21fe[2:],l2L21ab2[2:]],xLabel,yLabel,title,lineType,legend,markers,'v')
@@ -105,52 +105,13 @@ plotCompareMethods([stokes_solves_1[2:],stokes_solves_12[2:]],[l2L21fe[2:],l2L21
 #l2L2 pressure
 
 xLabel = 'Stokes solves'
-yLabel = r'$\|p-p_h\|_{l2L2}/\|p\|_{l2L2}$'
+yLabel = r'Relative $\ell^2(0,T;L^2(\Omega))$ error'
 #title = r'Pressure Error'
 title='Adaptive pressure error'
 lineType = ['k','k--','k-.','k.-']
 lineType = ['k','k--','k-.']
 lineType = ['k','b','r','k','m-.','c:','g']
 markers = ['v','o','s','^','P','*','|']
-legend= ['BEAB2',\
-		'VSVO 12']
+legend= ['VSS BE-AB2',\
+		'MOOSE-IMEX-12']
 plotCompareMethods([stokes_solves_1[2:],stokes_solves_12[2:]],[l2L21fePressure[2:],l2L21ab2Pressure[2:]],xLabel,yLabel,title,lineType,legend,markers,'p')
-
-
-
-#MORE DETAILED PLOT SHOWING THE PURELY SECOND ORDER METHODS
-
-"""
-xLabel = 'Stokes solves'
-yLabel = r'$\|u-u_h\|_{l2L2}/\|u\|_{l2L2}$'
-#title = r'Velocity Error'
-title='Adaptive Velocity Error'
-#lineType = ['k','k--','k-.','k.-']
-lineType = []
-lineType = ['k','b','g','r.-']
-lineType = ['k','b','r','k']
-markers = ['v','o','s','^']
-legend= ['BEFE',\
-		'VSVO 12',\
-		'BEAB2+F']
-
-
-plotCompareMethods([stokes_solves_1[2:],stokes_solves_12[2:],stokes_solves_2[2:]],[l2L21fe[2:],l2L21ab2[2:],l2L22ab2[2:]],xLabel,yLabel,title,lineType,legend,markers)
-
-#l2L2 pressure
-
-xLabel = 'runtime (s)'
-yLabel = r'$\|p-p_h\|_{l2L2}/\|p\|_{l2L2}$'
-#title = r'Pressure Error'
-title='Adaptive Pressure Error'
-lineType = ['k','k--','k-.','k.-']
-lineType = ['k','k--','k-.']
-lineType = ['k','b','r','k','m-.','c:','g']
-markers = ['v','o','s','^','P','*','|']
-legend= ['BEFE',\
-		'VSVO 12',\
-		'BEAB2+F']
-plotCompareMethods([stokes_solves_1[2:],stokes_solves_12[2:],stokes_solves_2[2:]],[l2L21fePressure[2:],l2L21ab2Pressure[2:],l2L22ab2Pressure[2:]],xLabel,yLabel,title,lineType,legend,markers)
-
-
-"""

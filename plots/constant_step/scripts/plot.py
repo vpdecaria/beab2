@@ -60,8 +60,9 @@ def plotCompareMethods(dt, methodData,xLabel,yLabel,title,lineType,labels,marker
 	plt.loglog([x_l,x_u],[4*x_l**2,4*x_u**2],'k--',label = 'slope 2')
 	#plt.loglog([x_l,x_u],[x_l**3,x_u**3],'k-.',label = 'slope 3')
 	#plt.loglog([x_l,x_u],[3*x_l**4,3*x_u**4],'k:',label = 'slope 4')
-	plt.legend(loc = 4)
-	
+
+	plt.legend(loc = 4,fontsize = 16)
+	plt.tight_layout()
 	
 	
 	
@@ -75,25 +76,25 @@ def plotCompareMethods(dt, methodData,xLabel,yLabel,title,lineType,labels,marker
 #l2L2
 
 xLabel = r'$\Delta t$'
-yLabel = r'$\|u-u_h\|_{l2L2}/\|u\|_{l2L2}$'
+yLabel = r'Relative $\ell^2(0,T;L^2(\Omega))$ error'
 #title = r'Velocity Error'
-title='Nonadaptive Velocity Error'
+title='Nonadaptive velocity error'
 #lineType = ['k','k--','k-.','k.-']
 lineType = []
 lineType = ['k','b','g','r.-']
 lineType = ['k','b','r','k']
 markers = ['v','o','s','^']
-legend= ['BEFE',\
-		'BEAB2',\
-		'BEAB2+F']
+legend= ['BE-FE',\
+		'BE-AB2',\
+		'BE-AB2+F']
 plotCompareMethods(dt,[l2L21fe,l2L21ab2,l2L22ab2],xLabel,yLabel,title,lineType,legend,markers)
 
 #l2L2 pressure
 
-xLabel = r'k'
-yLabel = r'$\|p-p_h\|_{l2L2}/\|p\|_{l2L2}$'
+xLabel = r'$\Delta t$'
+yLabel = r'Relative $\ell^2(0,T;L^2(\Omega))$ error'
 #title = r'Pressure Error'
-title='Nonadaptive Pressure Error'
+title='Nonadaptive pressure error'
 lineType = ['k','k--','k-.','k.-']
 lineType = ['k','k--','k-.']
 lineType = ['k','b','r','k','m-.','c:','g']
@@ -103,7 +104,7 @@ legend= ['BDF3-Stab, m = '+'{0:.3f}'.format(slopel2L20),\
 		'BDF3, m = '+'{0:.3f}'.format(slopel2L203),\
 		'BDF3-4, m = '+'{0:.3f}'.format(slopel2L204)]
 """
-legend= ['BEFE',\
-		'BEAB2',\
-		'BEAB2+F']
+legend= ['BE-FE',\
+		'BE-AB2',\
+		'BE-AB2+F']
 plotCompareMethods(dt,[l2L21fePressure,l2L21ab2Pressure,l2L22ab2Pressure],xLabel,yLabel,title,lineType,legend,markers)

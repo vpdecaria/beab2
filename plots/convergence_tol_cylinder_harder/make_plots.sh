@@ -1,3 +1,3 @@
 cd scripts
-python3 compileErrors.py
-python3 plot.py
+python compileErrors.py
+python plot.py
