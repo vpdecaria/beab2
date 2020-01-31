@@ -1,5 +1,9 @@
 # beab2
-Backward Euler/Adams Bashforth 2. An adaptive, implicit/explicit, timestepping method for the Navier-Stokes equation using FEniCS.
+This is an implementation of an adaptive stepsize and or Implicit/Explicit (IMEX) timestepping scheme for the incompressible Navier-Stokes equations. The method is called MOOSE-IMEX-12. MOOSE stands for Multiple Order One Solve Embedded, because there is only one linear solve each time step, but two solutions of different orders of accuracy are produced.  
+
+We use FEniCS for the finite element discretization.
+
+This is an embedded timestepping method based on backward Euler/Adams Bashforth 2 (BE-AB2).
 
 BEAB2.py is the main script. With FEniCS installed, it is run with
 
@@ -17,6 +21,6 @@ bash tests/nameofscript.sh
 
 ## problems
 
-Contains modules that define the domain for different test.
+Contains modules that define the domain, boundary conditions, and body forces for different tests.
 
 
