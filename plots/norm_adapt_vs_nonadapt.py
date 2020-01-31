@@ -71,8 +71,8 @@ def plotCompareMethods(dt, methodData,xLabel,title,lineType,labels):
 plt.figure(1)
 tFine = np.linspace(0,45,10000)
 #plt.show()
-plt.plot(t,normU,marker = 'x',label=r'VSVO-12, $TOL=10^{-2}$')
-plt.plot(t1,normU1,'--',label='2nd order - nonadaptive')
+plt.plot(t,normU,marker = 'x',label=r'MOOSE-IMEX-12, $TOL=10^{-2}$')
+plt.plot(t1,normU1,'--',label='BE-AB2+F - nonadaptive')
 #plt.plot(t,normUExact)
 
 
@@ -101,29 +101,14 @@ plt.legend(fontsize = 14)
 plt.ylabel(r'$||u||$',fontsize = 18)
 plt.xlabel('t',fontsize = 18)
 plt.xlim([0,45])
-plt.title('Evolution of adaptive vs nonadaptive velocity norms\n with same number of Stokes solves',fontsize=16)
+plt.title('Adaptive vs nonadaptive velocity norms\n with same number of Stokes solves',fontsize=16)
 plt.show()
 
-
-#The below plots also showed the order of the method being used.
-"""
-[t,k,filters,normU,normP,normUExact,normPExact,Uerror,Perror] = getData('../errors/convergenceTestWRTtoleranceHarder/order-12-tol-1e-2.txt')	
-[t1,k1,filters1,normU1,normP1,normUExact1,normPExact1,Uerror1,Perror1] = getData('../errors/convergenceTestWRTtoleranceHarder/order-12-constantstep-tol-1e-2.txt')	
-
 plt.figure(1)
-
-plt.subplot(211)
-plt.title('VSVO versus Constant Stepsize Constant Order')
-plt.plot(t,filters+1)
-plt.ylabel('Order')
-plt.yticks([1,2])
-plt.xlim([0,45])
-
-plt.subplot(212)
 tFine = np.linspace(0,45,10000)
 #plt.show()
-plt.plot(t,normU,marker = 'x',label=r'VSVO-12, $TOL=10^{-2}$, 221 Stokes solves')
-plt.plot(t1,normU1,'--',label='second order - nonadaptive, 221 Stokes solves')
+plt.plot(t,normP,marker = 'x',label=r'MOOSE-IMEX-12, $TOL=10^{-2}$')
+plt.plot(t1,normP1,'--',label='BE-AB2+F - nonadaptive')
 #plt.plot(t,normUExact)
 
 
@@ -147,11 +132,10 @@ def smoothSteps(t):
 
 	
 exact = [np.sqrt(2)*np.pi*smoothSteps(T) for T in tFine]
-plt.plot(tFine,exact,'k',label=r'Exact $||u||$')
-plt.legend()
-plt.ylabel(r'$||u||$')
-plt.xlabel('t')
+plt.plot(t,normPExact,'k',label=r'Exact $||u||$')
+plt.legend(fontsize = 14)
+plt.ylabel(r'$||p||$',fontsize = 18)
+plt.xlabel('t',fontsize = 18)
 plt.xlim([0,45])
+plt.title('Adaptive vs nonadaptive pressure norms\n with same number of Stokes solves',fontsize=16)
 plt.show()
-
-"""
